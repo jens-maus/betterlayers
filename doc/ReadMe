@@ -1,0 +1,34 @@
+
+Starting:
+	The patch must be started before any layer structures are allocated.
+	So put it in your S:Startup-Sequence. It reads 'Env:BLayers', so preferably
+	start it after setting up Env:.
+
+Debug info:
+	The patch reads the variable BLayers. You can set it at any time to change
+	the debug output. Currently the environment variable can contain these
+	keywords (using space, comma or a pipe as delimiter, e.g. "important,
+	resources, memory"):
+
+		Obsolete: Tells when obsolete functions are used.
+		Memory: Stuff related to memory allocation.
+		Resources: Should tell when resources are leaked.
+		Layers: General info about creating, deleting, sizing, moving or depth arranging layers.
+		Important: Important stuff, such as creating SuperBitmap-layers (which aren't supported).
+		Graphics: Info from the graphics.library functions patched (ScrollRaster & ClipBlit).
+		All: All of the above.
+
+	A word of warning: since 'graphics' include ScrollRaster then debug output
+	sent to a console window, which use ScrollRaster, can cause trouble. Though
+	here it is easy to stop the infinite scroll, either by changing the BLayers-
+	variable, or reseting the console window.
+
+	You can send the patch a ctrl-c to make it dump memory info. Memory is
+	currently administrated like this:
+	A chunk of 32 KB is allocated from the system, and all allocations are then
+	made from this chunk (until a new chunk is required). When memory is freed,
+	it's linked to a free-list based on the size of the allocation (these
+	free-lists are checked before using the chunk).
+	So the patch will never return memory to the OS, but the memory used by the
+	patch rarely exceeds 10 KB, and since the patch only knows about 5
+	different structure sizes (to allocate) then the free-lists work optimal.

@@ -1,0 +1,128 @@
+#/***************************************************************************
+#
+# Version: MPL 1.1/GPL 2.0/LGPL 2.1
+#
+# The contents of this file are subject to the Mozilla Public License Version
+# 1.1 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+# http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+# for the specific language governing rights and limitations under the
+# License.
+#
+# The Original Code is the BetterLayers library.
+#
+# The Initial Developer of the Original Code is Allan Odgaard.
+# Portions created by the Initial Developer are Copyright (C) 1999-2005
+# the Initial Developer. All Rights Reserved.
+#
+# Contributor(s):
+#   BetterLayers Open Source Team - http://www.sf.net/projects/betterlayers
+#
+# Alternatively, the contents of this file may be used under the terms of
+# either the GNU General Public License Version 2 or later (the "GPL"), or
+# the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+# in which case the provisions of the GPL or the LGPL are applicable instead
+# of those above. If you wish to allow use of your version of this file only
+# under the terms of either the GPL or the LGPL, and not to allow others to
+# use your version of this file under the terms of the MPL, indicate your
+# decision by deleting the provisions above and replace them with the notice
+# and other provisions required by the GPL or the LGPL. If you do not delete
+# the provisions above, a recipient may use your version of this file under
+# the terms of any one of the MPL, the GPL or the LGPL.
+#
+# $Id$
+#
+#***************************************************************************/
+
+# Programs
+CC    = m68k-amigaos-gcc
+STRIP = m68k-amigaos-strip
+RM    = rm -f
+RMDIR = rm -rf
+MKDIR	= mkdir
+CP    = cp
+
+# Directories
+OBJDIR = .obj_os3
+BINDIR = bin_os3
+
+# Compiler/Linker flags
+CPU      = -m68020-60 -msoft-float
+CDEFS    = -D__BTL_VERDATE=\"`date +%d.%m.%Y`\" -D__BTL_VERDAYS="`expr \`date +%s\` / 86400 - 2922`"
+WARN     = -W -Wall
+OPTFLAGS = -O3 -fomit-frame-pointer -funroll-loops
+DEBUG    = -DDEBUG -g -O0
+CFLAGS   = -noixemul -I. -I../includes -c $(CPU) $(WARN) $(OPTFLAGS) $(DEBUG)
+LDFLAGS  = -noixemul -nostartfiles
+LDLIBS   = -lmui -ldebug
+
+# CPU and DEBUG can be defined outside, defaults to above
+# using e.g. "make DEBUG= CPU=-m68060" produces optimized non-debug 68060 version
+#
+# OPTFLAGS are disabled by DEBUG normally!
+#
+# ignored warnings are:
+# none - because we want to compile with -Wall all the time
+#
+
+TARGET     = $(BINDIR)/BetterLayers
+TESTTARGET = $(BINDIR)/BetterLayers-Test
+
+OBJS = $(OBJDIR)/BetterLayers.o \
+       $(OBJDIR)/Mask.o \
+       $(OBJDIR)/Patches.o \
+       $(OBJDIR)/FastMemory.o \
+       $(OBJDIR)/Debug.o
+
+TESTOBJS = $(OBJDIR)/BetterLayers-Test.o \
+           $(OBJDIR)/BetterLayers.o \
+           $(OBJDIR)/Mask.o \
+           $(OBJDIR)/Patches.o \
+           $(OBJDIR)/FastMemory.o \
+           $(OBJDIR)/Debug.o
+
+#
+
+all: $(BINDIR) $(OBJDIR) $(TARGET) $(TESTTARGET)
+
+# make the object directories
+$(OBJDIR):
+	@printf '\033[33mGenerating $@ directory\033[0m\n'
+	@$(MKDIR) $(OBJDIR)
+
+# make the binary directories
+$(BINDIR):
+	@printf '\033[33mGenerating $@ directory\033[0m\n'
+	@$(MKDIR) $(BINDIR)
+
+#
+
+$(OBJDIR)/%.o: %.c
+	@printf '\033[32mCompiling $<\033[0m\n'
+	@$(CC) $(CFLAGS) $< -o $@ -DNO_PPCINLINE_STDARG
+
+#
+
+$(TARGET): $(OBJS)
+	@printf '\033[32mLinking \033[1m$@\033[0m\n'
+	@$(CC) $(LDFLAGS) -o $@.debug $(OBJS) $(LDLIBS)
+	@$(STRIP) -o $@ $@.debug
+
+$(TESTTARGET): $(TESTOBJS)
+	@printf '\033[32mLinking \033[1m$@\033[0m\n'
+	@$(CC) -noixemul -o $@.debug $(TESTOBJS) $(LDLIBS)
+	@$(STRIP) -o $@ $@.debug
+
+#
+
+.PHONY: clean
+clean:
+	-$(RM) $(TARGET) $(TARGET).debug $(TESTTARGET) $(TESTTARGET).debug $(OBJS) $(TESTOBJS)
+
+.PHONY: distclean
+distclean: clean
+	-$(RMDIR) $(OBJDIR)
+	-$(RMDIR) $(BINDIR)

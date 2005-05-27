@@ -1,0 +1,24 @@
+------------------------------------
+BetterLayers Open Source - ChangeLog
+------------------------------------
+
+$Id$
+$Source$
+
+2005-05-27  Jens Langner <Jens.Langner@light-speed.de>
+
+    * initial CVS checkin of MPL/GPL/LGPL releases sources.
+
+      NOTE:
+      The current state of sources are more or less the original one from
+      Allan. Back then he used StormC to compile the sources for m68k. This
+      means that the sources do surely not compile out-of-the-box and I
+      doubt they will. Also the library interface seems to be completly
+       missing right now. There might also be redundant code passages/files
+      which we are going to find out step by step. Also it is not clear
+      whether the functions in "BetterLayersNG.c" are of any use as it seems
+      that Allan wanted to start BetterLayers from scratch but was
+      interrupted that time when his harddisk crashed.
+      So to sum it up: The sources found here should be complete, but they
+      definitly do not compile out of the box and they are also probably
+      containing heaps of hided bugs. Ergo: We do have heaps of work now :)
